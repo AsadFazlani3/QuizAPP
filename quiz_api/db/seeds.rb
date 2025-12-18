@@ -1,10 +1,21 @@
 # Create admin user
-admin = AdminUser.find_or_create_by!(email: "admin@example.com") do |a|
-  a.password = "password123"
-  a.name = "Admin User"
+puts "Creating admin user..."
+admin = AdminUser.find_or_initialize_by(email: "admin@example.com")
+
+if admin.new_record?
+  admin.password = "password123"
+  admin.password_confirmation = "password123"
+  admin.name = "Admin User"
+  admin.save!
+  puts "✓ Created admin user: #{admin.email}"
+else
+  puts "✓ Admin user already exists: #{admin.email}"
 end
 
-puts "Created admin user: #{admin.email}"
+puts "  Email: #{admin.email}"
+puts "  Password: password123"
+puts "  Name: #{admin.name || 'Not set'}"
+puts ""
 
 # Create a published quiz with all question types
 quiz = Quiz.find_or_create_by!(slug: "sample-quiz") do |q|

@@ -89,20 +89,35 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
+  # Render automatically provides DATABASE_URL when you add a PostgreSQL database
+  # Rails will automatically use DATABASE_URL if present for the primary database
+  primary:
     <<: *default
-    database: quiz_api_production
-    username: quiz_api
-    password: <%= ENV["QUIZ_API_DATABASE_PASSWORD"] %>
+    # Use DATABASE_URL if provided (Render sets this automatically)
+    # If DATABASE_URL is not set, use individual connection parameters
+    <% if ENV["DATABASE_URL"].present? %>
+    url: <%= ENV["DATABASE_URL"] %>
+    <% else %>
+    database: <%= ENV.fetch("DATABASE_NAME", "quiz_api_production") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "quiz_api") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
+    port: <%= ENV.fetch("DATABASE_PORT", "5432") %>
+    <% end %>
+  
+  # For multiple database setup, use separate DATABASE_URLs or share the primary connection
+  # Render typically provides one PostgreSQL database, so these will use the same connection
   cache:
-    <<: *primary_production
-    database: quiz_api_production_cache
+    <<: *default
+    url: <%= ENV["CACHE_DATABASE_URL"] || ENV["DATABASE_URL"] %>
     migrations_paths: db/cache_migrate
+  
   queue:
-    <<: *primary_production
-    database: quiz_api_production_queue
+    <<: *default
+    url: <%= ENV["QUEUE_DATABASE_URL"] || ENV["DATABASE_URL"] %>
     migrations_paths: db/queue_migrate
+  
   cable:
-    <<: *primary_production
-    database: quiz_api_production_cable
+    <<: *default
+    url: <%= ENV["CABLE_DATABASE_URL"] || ENV["DATABASE_URL"] %>
     migrations_paths: db/cable_migrate

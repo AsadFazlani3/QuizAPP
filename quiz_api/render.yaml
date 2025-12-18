@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: quiz-api
+    env: ruby
+    buildCommand: bundle install
+    startCommand: bundle exec puma -C config/puma.rb
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: true
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false  # Set this manually to your Cloudflare Pages URL
+      - key: RAILS_MAX_THREADS
+        value: 5
+      - key: SOLID_QUEUE_IN_PUMA
+        value: true
+
+databases:
+  - name: quiz-api-db
+    databaseName: quiz_api_production
+    user: quiz_api
+    plan: free  # Change to 'starter' or higher for production use
+
